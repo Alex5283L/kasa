@@ -2,280 +2,82 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Молодіжна каса — жива панель прозорості</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#000000">
+<title>Молодіжна каса</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Commissioner:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-<script src="https://unpkg.com/lucide@latest"></script>
-<style>
-:root{--bg:#f3eee4;--card:#fffdf8;--ink:#2b2a26;--muted:#8c8678;--line:#e8e0d1;--accent:#1f6f5c;--income:#2f8f74;--expense:#cf7b63;--soft:#e9f1ec;--radius:9px}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);background-image:radial-gradient(circle at 15% 8%,#ffffff55,transparent 45%);color:var(--ink);font-family:'Commissioner',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1180px;margin:0 auto;padding:34px 26px 70px}
-.mono{font-variant-numeric:tabular-nums}
-.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
-.brand .live{display:inline-flex;align-items:center;gap:7px;color:var(--income);text-transform:none;letter-spacing:0}
-.brand .pulse{width:8px;height:8px;border-radius:50%;background:var(--income);animation:pulse 2s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(47,143,116,.5)}70%{box-shadow:0 0 0 8px rgba(47,143,116,0)}100%{box-shadow:0 0 0 0 rgba(47,143,116,0)}}
-.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-family:inherit;font-size:13.5px;font-weight:600;padding:8px 14px;border-radius:8px;cursor:pointer;transition:.15s}
-.btn:hover{border-color:var(--accent);color:var(--accent)}
-.beta{display:inline-block;font-family:'Commissioner',sans-serif;font-size:.3em;font-weight:700;vertical-align:middle;background:var(--accent);color:#fff;padding:4px 10px;border-radius:20px;letter-spacing:.05em;margin-left:12px;transform:translateY(-6px)}
-.periods{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
-.seg{border:1px solid var(--line);background:var(--card);color:var(--muted);font-family:inherit;font-size:13.5px;font-weight:600;padding:8px 15px;border-radius:8px;cursor:pointer;transition:.15s}
-.seg:hover{border-color:var(--accent);color:var(--accent)}
-.seg.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-.hero{margin:22px 0 30px}
-.hero h1{font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(28px,5vw,50px);line-height:1.03;letter-spacing:-.01em;max-width:16ch}
-.hero .q{margin-top:14px;font-size:clamp(16px,2vw,20px);color:var(--accent);font-weight:600}
-.hero .sub{margin-top:6px;color:var(--muted);font-size:15px;max-width:62ch}
-.answer{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:16px;margin-bottom:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px}
-.label{color:var(--muted);font-size:12.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;display:flex;align-items:center;gap:8px}
-.balance .big{font-family:'Unbounded',sans-serif;font-weight:800;font-size:clamp(38px,6vw,60px);line-height:1;margin-top:14px;color:var(--accent)}
-.balance .big small{font-size:.4em;font-weight:600;color:var(--muted);margin-left:6px}
-.balance .note{margin-top:12px;color:var(--muted);font-size:14px;display:flex;align-items:center;gap:7px}
-.mini .val{font-family:'Unbounded',sans-serif;font-weight:600;font-size:clamp(22px,3vw,30px);margin-top:12px}
-.mini .val.inc{color:var(--income)}
-.mini .val.exp{color:var(--expense)}
-.mini .foot{margin-top:9px;font-size:13px;color:var(--muted)}
-.icon{width:17px;height:17px;stroke-width:2}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
-.sec-h{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;margin-bottom:3px}
-.sec-h .ic{color:var(--accent)}
-.sec-sub{color:var(--muted);font-size:13.5px;margin-bottom:14px}
-.chart{width:100%;height:280px}
-.insight{margin-top:14px;background:var(--soft);border-radius:7px;padding:12px 15px;font-size:14px;color:#2d4a40}
-.insight b{color:var(--accent)}
-.empty{height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);text-align:center}
-.empty .icon{width:30px;height:30px;color:#c3bcac}
-table{width:100%;border-collapse:collapse;font-size:14.5px}
-thead th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;letter-spacing:.07em;text-transform:uppercase;padding:0 12px 11px;border-bottom:1px solid var(--line)}
-tbody td{padding:13px 12px;border-bottom:1px solid var(--line)}
-tbody tr:last-child td{border-bottom:none}
-.pill{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap}
-.pill.inc{background:#e3f0ea;color:var(--income)}
-.pill.exp{background:#f6e5df;color:var(--expense)}
-.amt{font-family:'Unbounded',sans-serif;font-weight:600;text-align:right;white-space:nowrap}
-.amt.inc{color:var(--income)}
-.amt.exp{color:var(--expense)}
-.right{text-align:right}
-.foot-note{margin-top:28px;color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:16px 20px;border-top:1px solid var(--line);padding-top:18px}
-.foot-note span{display:flex;align-items:center;gap:7px}
-.state{padding:60px 20px;text-align:center;color:var(--muted)}
-.state .spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.err{background:#f6e5df;color:#8a4733;border-radius:8px;padding:16px 18px;font-size:14px;max-width:620px;margin:0 auto;text-align:left}
-#dash{display:none}
-.donate{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:16px;background:linear-gradient(120deg,#fffdf8,#eef4f0)}
-.donate-info{flex:1;min-width:240px}
-.card-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}
-.card-label{color:var(--muted);font-size:13px}
-.card-num{font-family:'Unbounded',sans-serif;font-weight:600;font-size:clamp(18px,3vw,22px);letter-spacing:.04em;color:var(--accent)}
-.copy-btn{padding:6px 11px;font-size:12.5px}
-.mono-btn{background:var(--accent);color:#fff;border-color:var(--accent);font-size:14px;padding:11px 18px;white-space:nowrap}
-.mono-btn:hover{background:#17584a;color:#fff;border-color:#17584a}
-.mono-link{display:flex;flex-direction:column;gap:4px;min-width:200px}
-.mono-link .card-label{font-weight:600;color:var(--ink)}
-.mono-link a{color:var(--accent);font-weight:600;font-size:15px;word-break:break-all;text-decoration:underline}
-.foot-note a{color:inherit}
-@media(max-width:860px){.answer{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
-@media(max-width:620px){
-  .wrap{padding:20px 15px 54px}
-  .topbar{flex-direction:column;align-items:stretch;gap:10px}
-  #refreshBtn{width:100%;justify-content:center}
-  .hero{margin:16px 0 20px}
-  .card{padding:17px 16px}
-  .chart{height:300px}
-  .donate{flex-direction:column;align-items:stretch}
-  .mono-btn{width:100%;justify-content:center}
-  .card-row{gap:8px}
-  thead th,tbody td{padding-left:7px;padding-right:7px}
-  table{font-size:13px}
-  .foot-note{gap:10px 14px}
-  .seg{flex:1;text-align:center;padding:9px 8px}
-  .beta{display:block;margin-left:0;margin-top:8px;transform:none;width:fit-content}
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="wrap">
-<div class="topbar">
-  <div class="brand"><span>Молодіжна каса</span><span class="live"><span class="pulse"></span>живі дані</span></div>
-  <button class="btn" id="refreshBtn"><i data-lucide="refresh-cw" class="icon"></i>Оновити</button>
-</div>
-<div class="hero">
-  <h1>Молодіжна каса<span class="beta">Beta</span></h1>
-</div>
-<div class="card donate">
-  <div class="donate-info">
-    <div class="sec-h"><i data-lucide="hand-coins" class="icon ic"></i>Поповнити касу</div>
-    <div class="card-row">
-      <span class="card-label">Номер картки</span>
-      <span class="card-num mono" id="cardNum">4874 1000 3330 6757</span>
-      <button class="btn copy-btn" id="copyCard"><i data-lucide="copy" class="icon"></i>Скопіювати</button>
+<main class="app">
+
+  <header class="top">
+    <h1>Молодіжна каса</h1>
+    <button class="chip" id="refresh" type="button">Оновити</button>
+  </header>
+
+  <div id="loading" class="note">Завантажую дані з таблиці…</div>
+  <div id="error" class="note err" hidden></div>
+
+  <div id="dash" hidden>
+    <section class="hero">
+      <p class="muted">Залишок у касі</p>
+      <p class="balance" id="balance">—</p>
+      <div class="pair">
+        <div class="tile"><span class="muted">Надійшло</span><b class="inc" id="inc">—</b></div>
+        <div class="tile"><span class="muted">Витрачено</span><b id="exp">—</b></div>
+      </div>
+    </section>
+
+    <div class="chips" id="periods" role="group" aria-label="Період">
+      <button class="chip" type="button" data-p="7">7 днів</button>
+      <button class="chip" type="button" data-p="30">30 днів</button>
+      <button class="chip" type="button" data-p="365">Рік</button>
+      <button class="chip on" type="button" data-p="all">Увесь час</button>
     </div>
+
+    <p class="warn" id="warn" hidden></p>
+
+    <section class="card">
+      <h2>Динаміка залишку</h2>
+      <div id="trend"></div>
+    </section>
+
+    <section class="card">
+      <h2>Звідки гроші</h2>
+      <ul class="cats" id="incCats"></ul>
+    </section>
+
+    <section class="card">
+      <h2>На що витрачаємо</h2>
+      <ul class="cats" id="expCats"></ul>
+    </section>
+
+    <section class="card donate">
+      <h2>Поповнити касу</h2>
+      <a class="btn" href="https://send.monobank.ua/jar/4reW48M5xv" target="_blank" rel="noopener noreferrer">Поповнити банку</a>
+      <div class="cardrow">
+        <span id="cardNum">4874 1000 3330 6757</span>
+        <button class="chip" id="copy" type="button">Скопіювати</button>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="pad">Операції</h2>
+      <div id="journal"></div>
+      <button class="chip more" id="more" type="button" hidden>Показати ще</button>
+    </section>
+
+    <footer class="muted">
+      <p>Баланс = надходження − витрати. Дані з таблиці «Нова молодіжна каса».</p>
+      <p id="updated"></p>
+      <p>Питання та пропозиції: <a href="tel:+380987715900">+380 98 771 59 00</a></p>
+    </footer>
   </div>
-  <div class="mono-link">
-    <span class="card-label">Поповнити банку mono</span>
-    <a href="https://send.monobank.ua/jar/4reW48M5xv" target="_blank" rel="noopener noreferrer">send.monobank.ua/jar/4reW48M5xv</a>
-  </div>
-</div>
-<div id="loading" class="state"><div class="spin"></div>Завантажую свіжі дані з таблиці…</div>
-<div id="error" class="state" style="display:none"><div class="err" id="errMsg"></div></div>
-<div id="dash">
-  <div class="periods" id="periods">
-    <button class="seg" data-p="7">7 днів</button>
-    <button class="seg" data-p="30">30 днів</button>
-    <button class="seg" data-p="365">1 рік</button>
-    <button class="seg active" data-p="all">Увесь час</button>
-  </div>
-  <div class="answer">
-    <div class="card balance">
-      <div class="label"><i data-lucide="wallet" class="icon"></i>Баланс</div>
-      <div class="big mono" id="kBalance">—</div>
-    </div>
-    <div class="card mini">
-      <div class="label"><i data-lucide="arrow-down-to-line" class="icon"></i>Надходження</div>
-      <div class="val inc mono" id="kInc">—</div>
-    </div>
-    <div class="card mini">
-      <div class="label"><i data-lucide="arrow-up-from-line" class="icon"></i>Витрати</div>
-      <div class="val exp mono" id="kExp">—</div>
-    </div>
-  </div>
-  <div class="grid">
-    <div class="card">
-      <div class="sec-h"><i data-lucide="pie-chart" class="icon ic"></i>Звідки надходять кошти</div>
-      <div class="sec-sub">Розподіл надходжень за категоріями</div>
-      <div id="incWrap"></div>
-      <div class="insight" id="incInsight"></div>
-    </div>
-    <div class="card">
-      <div class="sec-h"><i data-lucide="pie-chart" class="icon ic"></i>На що витрачаємо</div>
-      <div class="sec-sub">Розподіл витрат за категоріями</div>
-      <div id="expWrap"></div>
-      <div class="insight" id="expInsight"></div>
-    </div>
-  </div>
-  <div class="card" style="margin-bottom:16px">
-    <div class="sec-h"><i data-lucide="trending-up" class="icon ic"></i>Динаміка балансу</div>
-    <div class="sec-sub">Як змінювався залишок каси після кожної операції</div>
-    <div id="trendChart" class="chart" style="height:260px"></div>
-    <div class="insight" id="trendInsight"></div>
-  </div>
-  <div class="card" style="margin-bottom:16px">
-    <div class="sec-h"><i data-lucide="receipt-text" class="icon ic"></i>Журнал операцій</div>
-    <div class="sec-sub">Повний перелік усіх внесків та витрат (від новіших до старіших)</div>
-    <div style="overflow-x:auto"><table><thead><tr><th>Дата та час</th><th>Тип</th><th>Категорія</th><th>Опис</th><th class="right">Сума</th></tr></thead><tbody id="tbody"></tbody></table></div>
-  </div>
-  <div class="foot-note">
-    <span><i data-lucide="database" class="icon"></i>Джерело: форма «Нова молодіжна каса» (Google Форми / Таблиці)</span>
-    <span><i data-lucide="calculator" class="icon"></i>Баланс = надходження − витрати</span>
-    <span><i data-lucide="clock" class="icon"></i><span id="updated"></span></span>
-    <span><i data-lucide="phone" class="icon"></i>Питання чи пропозиції: <a href="tel:+380987715900">+380 98 771 59 00</a></span>
-  </div>
-</div>
-<script>
-const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vTWOAFpmnkadEcNZEW7AC-NhxsRTEoN1p6j80Tx6YCtmZR1FsvNIL9kOdiLNFVQQTAlzUJ1uPfW6LDJ/pub?gid=735801705&single=true&output=csv";
-const NBSP='\u202f';
-const money=v=>Math.round(v).toLocaleString('uk-UA').replace(/[\s,\u00a0]/g,NBSP);
-const base={textStyle:{fontFamily:'Commissioner,sans-serif'}};
-const tip={backgroundColor:'#fffdf8',borderWidth:0,extraCssText:'box-shadow:0 6px 22px rgba(40,30,10,.14);border-radius:8px;',textStyle:{color:'#2b2a26',fontFamily:'Commissioner,sans-serif',fontSize:13}};
-const incPal=['#2f8f74','#6f9fc4','#c9a24b','#7bb0a0','#9a86c4','#8ab0d4'];
-const expPal=['#cf7b63','#d1a07a','#c99a9a','#b98b6b','#caa37c','#d4b48a'];
-function parseCSV(t){const rows=[];let i=0,f='',row=[],q=false;t=t.replace(/\r/g,'');
-  while(i<t.length){const c=t[i];
-    if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++;}else q=false;}else f+=c;}
-    else{if(c=='"')q=true;else if(c==','){row.push(f);f='';}else if(c=='\n'){row.push(f);rows.push(row);row=[];f='';}else f+=c;}
-    i++;}
-  if(f.length||row.length){row.push(f);rows.push(row);}
-  return rows.filter(r=>r.some(c=>c&&c.trim()!=''));}
-const num=s=>{const n=parseFloat(String(s).replace(/\s/g,'').replace(/[^0-9.,-]/g,'').replace(',','.'));return isNaN(n)?0:n;};
-function parseDate(s){s=String(s||'').trim();let m=s.match(/(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})[ ,]+(\d{1,2}):(\d{2})(?::(\d{2}))?/);if(m)return new Date(+m[3],+m[2]-1,+m[1],+m[4],+m[5],+(m[6]||0));m=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})[ T]+(\d{1,2}):(\d{2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5]);const d=new Date(s);return isNaN(d)?null:d;}
-const isExpense=t=>/витра|розхід|expense|списа/i.test(t||'');
-function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function plural(n,a,b,c){const m=n%10,h=n%100;if(m===1&&h!==11)return a;if(m>=2&&m<=4&&(h<10||h>=20))return b;return c;}
-const OP=n=>plural(n,'операція','операції','операцій');
-function fmtDT(d){if(!d)return '—';const p=n=>String(n).padStart(2,'0');return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;}
-function shortDT(d){const p=n=>String(n).padStart(2,'0');return `${p(d.getDate())}.${p(d.getMonth()+1)} ${p(d.getHours())}:${p(d.getMinutes())}`;}
-let incChart,expChart,trendChart;
-async function load(){
-  const L=document.getElementById('loading'),E=document.getElementById('error'),D=document.getElementById('dash');
-  L.style.display='block';E.style.display='none';D.style.display='none';
-  try{
-    const res=await fetch(CSV_URL+'&_t='+Date.now());
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    const rows=parseCSV(await res.text());
-    if(rows.length<2)throw new Error('Таблиця порожня');
-    const data=rows.slice(1).map(r=>({date:parseDate(r[0]),type:(r[1]||'').trim(),cat:((r[2]||'').trim()||'Без категорії'),sum:num(r[3]),desc:(r[4]||'').trim(),exp:isExpense(r[1])})).filter(o=>o.sum>0);
-    allData=data;applyPeriod();
-    L.style.display='none';D.style.display='block';
-    if(window.lucide)lucide.createIcons();
-  }catch(err){
-    L.style.display='none';E.style.display='block';
-    document.getElementById('errMsg').innerHTML='<b>Не вдалося завантажити дані з таблиці.</b><br>Перевірте інтернет-зʼєднання та те, чи таблиця досі опублікована в Інтернеті, а потім натисніть «Оновити».<br><span style="opacity:.7">('+esc(err.message)+')</span>';
-  }
-}
-function groupBy(arr){const m={};arr.forEach(d=>{m[d.cat]=(m[d.cat]||0)+d.sum;});return Object.entries(m).map(([name,value])=>({name,value})).sort((a,b)=>b.value-a.value);}
-function donut(dom,items,total,label,pal){
-  const data=items.map((it,i)=>({name:it.name,value:it.value,itemStyle:{color:pal[i%pal.length]}}));
-  const c=echarts.init(dom);
-  c.setOption({...base,tooltip:{...tip,trigger:'item',formatter:p=>`${p.marker} ${p.name}<br><b style="font-size:15px">${money(p.value)} ₴</b>&nbsp;&nbsp;(${p.percent}%)`},
-    legend:{bottom:0,icon:'circle',itemWidth:9,itemHeight:9,textStyle:{color:'#8c8678',fontFamily:'Commissioner'}},
-    series:[{type:'pie',radius:['52%','74%'],center:['50%','43%'],avoidLabelOverlap:true,itemStyle:{borderColor:'#fffdf8',borderWidth:3,borderRadius:4},
-      label:{show:true,position:'center',formatter:`{t|${money(total)} ₴}\n{s|${label}}`,rich:{t:{fontFamily:'Unbounded',fontSize:21,fontWeight:800,color:'#1f6f5c'},s:{fontSize:12,color:'#8c8678',padding:[4,0,0,0]}}},
-      emphasis:{label:{show:true}},labelLine:{show:false},data}]});
-  return c;
-}
-function emptyBox(dom,msg){dom.innerHTML=`<div class="empty"><i data-lucide="inbox" class="icon"></i><div>${msg}</div></div>`;}
-let allData=[],period='all';
-function cutoffFor(p){const now=Date.now(),day=86400000;if(p==='7')return now-7*day;if(p==='30')return now-30*day;if(p==='365')return now-365*day;return null;}
-function applyPeriod(){const co=cutoffFor(period);let pd,opening=0;if(co===null){pd=allData;}else{pd=allData.filter(x=>x.date&&x.date.getTime()>=co);opening=allData.filter(x=>x.date&&x.date.getTime()<co).reduce((s,x)=>s+(x.exp?-x.sum:x.sum),0);}render(pd,opening);if(window.lucide)lucide.createIcons();}
-function render(data,opening){opening=opening||0;
-  const inc=data.filter(d=>!d.exp),exp=data.filter(d=>d.exp);
-  const incSum=inc.reduce((s,d)=>s+d.sum,0),expSum=exp.reduce((s,d)=>s+d.sum,0),bal=opening+incSum-expSum;
-  document.getElementById('kBalance').innerHTML=money(bal)+'<small>₴</small>';
-  document.getElementById('kInc').textContent='+'+money(incSum)+' ₴';
-  document.getElementById('kExp').textContent='−'+money(expSum)+' ₴';
-  if(incChart){incChart.dispose();incChart=null;}
-  const iw=document.getElementById('incWrap');
-  if(inc.length){iw.innerHTML='<div id="incChart" class="chart"></div>';const g=groupBy(inc);incChart=donut(document.getElementById('incChart'),g,incSum,'надходжень',incPal);
-    const t=g[0];document.getElementById('incInsight').innerHTML=`Найбільше коштів надійшло з категорії <b>${esc(t.name)}</b> — ${money(t.value)} ₴ (${Math.round(t.value/incSum*100)}%).`;}
-  else{emptyBox(iw,'Ще немає надходжень');document.getElementById('incInsight').textContent='Додайте перше надходження через форму.';}
-  if(expChart){expChart.dispose();expChart=null;}
-  const ew=document.getElementById('expWrap');
-  if(exp.length){ew.innerHTML='<div id="expChart" class="chart"></div>';const g=groupBy(exp);expChart=donut(document.getElementById('expChart'),g,expSum,'витрат',expPal);
-    const t=g[0];document.getElementById('expInsight').innerHTML=`Найбільша стаття витрат — <b>${esc(t.name)}</b>: ${money(t.value)} ₴ (${Math.round(t.value/expSum*100)}%).`;}
-  else{emptyBox(ew,'Витрат ще немає');document.getElementById('expInsight').textContent='Щойно касир додасть витрату, вона зʼявиться тут.';}
-  const sorted=[...data].filter(d=>d.date).sort((a,b)=>a.date-b.date);
-  let run=opening;const pts=[['Початок',opening]];
-  sorted.forEach(d=>{run+=d.exp?-d.sum:d.sum;pts.push([shortDT(d.date),run]);});
-  if(trendChart)trendChart.dispose();
-  trendChart=echarts.init(document.getElementById('trendChart'));
-  trendChart.setOption({...base,tooltip:{...tip,trigger:'axis',formatter:p=>`${p[0].name}<br>Баланс: <b style="font-size:15px">${money(p[0].value)} ₴</b>`},
-    grid:{left:8,right:22,top:22,bottom:8,containLabel:true},
-    xAxis:{type:'category',boundaryGap:false,data:pts.map(p=>p[0]),axisLine:{lineStyle:{color:'#e8e0d1'}},axisTick:{show:false},axisLabel:{color:'#6b665b',hideOverlap:true}},
-    yAxis:{type:'value',splitLine:{lineStyle:{color:'#efe8da'}},axisLabel:{color:'#b2ab9c',formatter:v=>v>=1000?v/1000+'к':v}},
-    series:[{type:'line',step:'end',symbol:'circle',symbolSize:8,lineStyle:{color:'#1f6f5c',width:3},itemStyle:{color:'#1f6f5c'},
-      areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#2f8f7444'},{offset:1,color:'#2f8f7405'}])},
-      data:pts.map(p=>p[1])}]});
-  document.getElementById('trendInsight').innerHTML=`Поточний залишок після ${sorted.length} ${OP(sorted.length)} — <b>${money(bal)} ₴</b>.`;
-  const desc=[...data].sort((a,b)=>(b.date?b.date:0)-(a.date?a.date:0));
-  document.getElementById('tbody').innerHTML=desc.map(d=>`<tr><td class="mono">${fmtDT(d.date)}</td><td><span class="pill ${d.exp?'exp':'inc'}"><i data-lucide="${d.exp?'minus':'plus'}" style="width:13px;height:13px"></i>${d.exp?'Витрата':'Надходження'}</span></td><td>${esc(d.cat)}</td><td>${esc(d.desc)}</td><td class="amt ${d.exp?'exp':'inc'} mono">${d.exp?'−':'+'}${money(d.sum)} ₴</td></tr>`).join('');
-  document.getElementById('updated').textContent='Оновлено: '+fmtDT(new Date())+' · '+data.length+' '+OP(data.length);
-}
-window.addEventListener('resize',function(){if(incChart)incChart.resize();if(expChart)expChart.resize();if(trendChart)trendChart.resize();});
-document.getElementById('refreshBtn').addEventListener('click',load);
-Array.prototype.forEach.call(document.querySelectorAll('#periods .seg'),function(b){b.addEventListener('click',function(){period=b.getAttribute('data-p');Array.prototype.forEach.call(document.querySelectorAll('#periods .seg'),function(x){x.classList.remove('active');});b.classList.add('active');applyPeriod();});});
-var cb=document.getElementById('copyCard');
-function copyFallback(n,done){try{var ta=document.createElement('textarea');ta.value=n;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.top='-9999px';document.body.appendChild(ta);ta.focus();ta.select();ta.setSelectionRange(0,n.length);document.execCommand('copy');document.body.removeChild(ta);}catch(e){}done();}
-if(cb)cb.addEventListener('click',function(){var n='4874100033306757';var o='<i data-lucide="copy" class="icon"></i>Скопіювати';var done=function(){cb.innerHTML='<i data-lucide="check" class="icon"></i>Скопійовано';if(window.lucide)lucide.createIcons();setTimeout(function(){cb.innerHTML=o;if(window.lucide)lucide.createIcons();},1600);};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(n).then(done,function(){copyFallback(n,done);});}else{copyFallback(n,done);}});
-if(window.lucide)lucide.createIcons();
-load();
-</script>
-</div>
+
+</main>
+<script src="script.js"></script>
 </body>
 </html>
