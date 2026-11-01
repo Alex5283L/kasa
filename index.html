@@ -15,7 +15,10 @@
 
   <header class="top">
     <h1>Молодіжна каса</h1>
-    <button class="chip" id="refresh" type="button">Оновити</button>
+    <div class="tools">
+      <button class="chip" id="theme" type="button" aria-label="Тема оформлення">Авто</button>
+      <button class="chip" id="refresh" type="button">Оновити</button>
+    </div>
   </header>
 
   <div id="loading" class="note">Завантажую дані з таблиці…</div>
@@ -23,8 +26,15 @@
 
   <div id="dash" hidden>
     <section class="hero">
-      <p class="muted">Залишок у касі</p>
-      <p class="balance" id="balance">—</p>
+      <div class="card main">
+        <p class="muted">Залишок у касі</p>
+        <p class="balance" id="balance">—</p>
+        <div class="actions">
+          <a class="btn" href="https://send.monobank.ua/jar/4reW48M5xv" target="_blank" rel="noopener noreferrer">Поповнити банку</a>
+          <button class="btn alt" id="copy" type="button">Копіювати картку</button>
+        </div>
+        <p class="muted cardline">Картка <span id="cardNum">4874 1000 3330 6757</span></p>
+      </div>
       <div class="pair">
         <div class="tile"><span class="muted">Надійшло</span><b class="inc" id="inc">—</b></div>
         <div class="tile"><span class="muted">Витрачено</span><b id="exp">—</b></div>
@@ -53,15 +63,6 @@
     <section class="card">
       <h2>На що витрачаємо</h2>
       <ul class="cats" id="expCats"></ul>
-    </section>
-
-    <section class="card donate">
-      <h2>Поповнити касу</h2>
-      <a class="btn" href="https://send.monobank.ua/jar/4reW48M5xv" target="_blank" rel="noopener noreferrer">Поповнити банку</a>
-      <div class="cardrow">
-        <span id="cardNum">4874 1000 3330 6757</span>
-        <button class="chip" id="copy" type="button">Скопіювати</button>
-      </div>
     </section>
 
     <section>

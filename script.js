@@ -201,8 +201,33 @@ $("copy").addEventListener("click", async () => {
     document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
   }
   btn.textContent = "Скопійовано";
-  setTimeout(() => (btn.textContent = "Скопіювати"), 1600);
+  setTimeout(() => (btn.textContent = "Копіювати картку"), 1600);
 });
+
+/* ---------- тема: авто / темна / світла ---------- */
+
+const THEMES = ["auto", "dark", "light"];
+const THEME_NAMES = { auto: "Авто", dark: "Темна", light: "Світла" };
+let theme = "auto";
+try { theme = localStorage.getItem("theme") || "auto"; } catch {}
+if (!THEMES.includes(theme)) theme = "auto";
+
+function applyTheme() {
+  const root = document.documentElement;
+  if (theme === "auto") root.removeAttribute("data-theme");
+  else root.dataset.theme = theme;
+  $("theme").textContent = THEME_NAMES[theme];
+  const dark = theme === "dark" || (theme === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.querySelector('meta[name="theme-color"]').content = dark ? "#111113" : "#f2f2f5";
+}
+
+$("theme").addEventListener("click", () => {
+  theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+  try { localStorage.setItem("theme", theme); } catch {}
+  applyTheme();
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
+applyTheme();
 
 load(false);
 setInterval(() => { if (!document.hidden) load(true); }, 60000);
