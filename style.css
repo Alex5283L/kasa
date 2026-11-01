@@ -77,8 +77,7 @@ a { color: inherit; }
 .err { color: var(--bar); }
 .warn { background: var(--warn-bg); color: var(--warn-text); border-radius: 14px; padding: 12px 14px; font-size: 14px; margin-bottom: 12px; }
 
-#trend svg { width: 100%; height: 110px; display: block; }
-#trend polyline { stroke: var(--income); }
+#trend svg { display: block; width: 100%; height: 170px; touch-action: pan-y; }
 .empty { color: var(--muted); font-size: 14px; }
 
 .cats { list-style: none; display: grid; gap: 16px; }
@@ -98,3 +97,53 @@ a { color: inherit; }
 .more { display: block; margin: 16px auto 0; }
 
 footer { margin-top: 32px; display: grid; gap: 4px; text-align: center; }
+
+/* графік */
+.lbl { fill: var(--muted); font: 11px Inter, sans-serif; }
+.grid-line { stroke: var(--line); stroke-width: 1; }
+.trend-line { fill: none; stroke: var(--income); stroke-width: 2.5; stroke-linejoin: round; }
+.dot { fill: var(--income); stroke: var(--surface); stroke-width: 2; }
+.cur { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.curdot { fill: var(--income); stroke: var(--surface); stroke-width: 2.5; }
+.trend-info { margin-top: 6px; min-height: 21px; }
+.trend-info b { color: var(--text); font-weight: 600; }
+
+.icon-btn { width: 38px; height: 38px; padding: 0; display: grid; place-items: center; }
+.icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* плавність */
+body, .card, .tile, .group, .chip, .btn { transition: background-color .25s, color .25s, transform .15s; }
+.chip:active, .btn:active { transform: scale(.96); }
+@media (hover: hover) {
+  .chip:hover:not(.on) { background: var(--line); }
+  .btn:hover { opacity: .9; }
+}
+.bar i { transition: width .7s cubic-bezier(.2, .8, .2, 1); }
+#dash.show { animation: rise .5s ease-out; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+.trend-line.draw { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .9s ease-out forwards; }
+.trend-area.draw { opacity: 0; animation: fade .8s .3s ease-out forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes fade { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+
+/* нова операція */
+.toast {
+  position: fixed; top: max(12px, env(safe-area-inset-top)); left: 50%; z-index: 10;
+  background: var(--surface); color: var(--text); font-weight: 600; font-size: 15px;
+  padding: 12px 20px; border-radius: 999px; box-shadow: 0 6px 24px rgba(0, 0, 0, .25);
+  transform: translate(-50%, -160%); opacity: 0;
+}
+.toast.inc { color: var(--income); }
+.toast.in { animation: toast 4.6s cubic-bezier(.2, .8, .2, 1) forwards; }
+@keyframes toast {
+  8%, 88% { transform: translate(-50%, 0); opacity: 1; }
+  100% { transform: translate(-50%, -160%); opacity: 0; }
+}
+.op.new { animation: flash 2.6s ease-out; }
+@keyframes flash {
+  from { background: color-mix(in srgb, var(--income) 24%, transparent); transform: translateY(-8px); opacity: 0; }
+  25% { opacity: 1; transform: none; }
+}

@@ -15,10 +15,7 @@
 
   <header class="top">
     <h1>Молодіжна каса</h1>
-    <div class="tools">
-      <button class="chip" id="theme" type="button" aria-label="Тема оформлення">Авто</button>
-      <button class="chip" id="refresh" type="button">Оновити</button>
-    </div>
+    <button class="chip icon-btn" id="theme" type="button"></button>
   </header>
 
   <div id="loading" class="note">Завантажую дані з таблиці…</div>
@@ -53,6 +50,7 @@
     <section class="card">
       <h2>Динаміка залишку</h2>
       <div id="trend"></div>
+      <p class="muted trend-info" id="trendInfo"></p>
     </section>
 
     <section class="card">
@@ -79,6 +77,7 @@
   </div>
 
 </main>
+<div class="toast" id="toast" role="status" hidden></div>
 <script src="script.js"></script>
 </body>
 </html>
