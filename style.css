@@ -147,3 +147,13 @@ body, .card, .tile, .group, .chip, .btn { transition: background-color .25s, col
   from { background: color-mix(in srgb, var(--income) 24%, transparent); transform: translateY(-8px); opacity: 0; }
   25% { opacity: 1; transform: none; }
 }
+
+/* графік: легший вигляд */
+.trend-line { stroke-width: 2; }
+.grid-line { stroke-dasharray: 2 5; }
+.last-ring {
+  fill: var(--income); opacity: .25;
+  transform-box: fill-box; transform-origin: center;
+  animation: pulse 2.2s ease-out infinite;
+}
+@keyframes pulse { from { transform: scale(.5); opacity: .4; } to { transform: scale(1.7); opacity: 0; } }

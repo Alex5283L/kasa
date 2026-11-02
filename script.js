@@ -174,6 +174,7 @@ function renderTrend(rows, opening, animate) {
   const dated = rows.filter(r => r.date).sort((a, b) => a.date - b.date);
   if (!dated.length) { el.innerHTML = '<p class="empty">Ще немає операцій за цей період</p>'; info.innerHTML = ""; return; }
 
+  // точки рівномірно по операціях, а не по часу: довгі паузи не стискають графік
   let run = opening;
   const pts = [{ t: +dated[0].date, v: opening, text: "Початок періоду" }];
   dated.forEach(r => {
@@ -181,37 +182,45 @@ function renderTrend(rows, opening, animate) {
     pts.push({ t: +r.date, v: run, text: dayLabel(r.date) + ", " + time(r.date) });
   });
 
-  const W = el.clientWidth || 320, H = 170, top = 24, bottom = 24, plotH = H - top - bottom;
+  const W = el.clientWidth || 320, H = 170, top = 14, bottom = 26, padX = 8, plotH = H - top - bottom;
   const vs = pts.map(p => p.v), min = Math.min(...vs), max = Math.max(...vs);
-  const t0 = pts[0].t, tSpan = pts[pts.length - 1].t - t0;
+  const pad2 = (max - min) * 0.12 || Math.max(1, Math.abs(max) * 0.1);
+  const lo = min - pad2, hi = max + pad2;
   const f = n => n.toFixed(1);
-  const Y = v => max === min ? top + plotH / 2 : top + (1 - (v - min) / (max - min)) * plotH;
-  const xs = pts.map((p, i) => tSpan ? (p.t - t0) / tSpan * W : i / (pts.length - 1) * W);
-  const dm = d => pad(d.getDate()) + "." + pad(d.getMonth() + 1);
+  const Y = v => top + (1 - (v - lo) / (hi - lo)) * plotH;
+  const xs = pts.map((p, i) => padX + i / (pts.length - 1) * (W - 2 * padX));
+  const dm = t => { const d = new Date(t); return pad(d.getDate()) + "." + pad(d.getMonth() + 1); };
+  const base = H - bottom;
 
-  let d = `M${f(xs[0])} ${f(Y(pts[0].v))}`;
-  for (let i = 1; i < pts.length; i++) d += ` H${f(xs[i])} V${f(Y(pts[i].v))}`;
-  d += ` H${f(W)}`;
-  const area = `${d} V${H - bottom} H${f(xs[0])} Z`;
+  const line = pts.map((p, i) => `${i ? "L" : "M"}${f(xs[i])} ${f(Y(p.v))}`).join(" ");
+  const area = `${line} L${f(xs[xs.length - 1])} ${base} L${f(xs[0])} ${base} Z`;
   const cls = animate && !REDUCED ? " draw" : "";
+  const lastX = xs[xs.length - 1], lastY = Y(pts[pts.length - 1].v);
 
-  const first = dm(dated[0].date), last = dm(dated[dated.length - 1].date);
-  const dots = pts.length <= 40 ? pts.slice(1).map((p, i) => `<circle class="dot" cx="${f(xs[i + 1])}" cy="${f(Y(p.v))}" r="3.5"/>`).join("") : "";
+  // підписи дат: початок, (середина), кінець; однакові поспіль не повторюємо
+  const idx = pts.length >= 5 ? [0, Math.floor((pts.length - 1) / 2), pts.length - 1] : [0, pts.length - 1];
+  let prev = "";
+  const ticks = idx.map((i, k) => {
+    const text = dm(pts[i].t);
+    if (text === prev) return "";
+    prev = text;
+    const anchor = k === 0 ? "start" : (i === pts.length - 1 ? "end" : "middle");
+    return `<text class="lbl" x="${f(anchor === "start" ? padX : anchor === "end" ? W - padX : xs[i])}" y="${H - 7}" text-anchor="${anchor}">${text}</text>`;
+  }).join("");
+
+  const grid = [0, .5, 1].map(k => `<line class="grid-line" x1="0" x2="${W}" y1="${f(top + plotH * k)}" y2="${f(top + plotH * k)}"/>`).join("");
 
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Графік залишку">
     <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" style="stop-color:var(--income);stop-opacity:.3"/><stop offset="1" style="stop-color:var(--income);stop-opacity:0"/>
+      <stop offset="0" style="stop-color:var(--income);stop-opacity:.16"/><stop offset="1" style="stop-color:var(--income);stop-opacity:0"/>
     </linearGradient></defs>
-    <line class="grid-line" x1="0" x2="${W}" y1="${f(Y(max))}" y2="${f(Y(max))}"/>
-    ${max !== min ? `<line class="grid-line" x1="0" x2="${W}" y1="${f(Y(min))}" y2="${f(Y(min))}"/>` : ""}
-    <text class="lbl" x="0" y="${f(Y(max) - 6)}">${money(max)}</text>
-    ${max !== min ? `<text class="lbl" x="0" y="${f(Y(min) + 15)}">${money(min)}</text>` : ""}
+    ${grid}
     <path class="trend-area${cls}" d="${area}" fill="url(#ga)"/>
-    <path class="trend-line${cls}" pathLength="1" d="${d}"/>
-    ${dots}
-    <text class="lbl" x="0" y="${H - 6}">${first}</text>
-    ${last !== first ? `<text class="lbl" x="${W}" y="${H - 6}" text-anchor="end">${last}</text>` : ""}
-    <line class="cur" id="cur" x1="0" x2="0" y1="${top}" y2="${H - bottom}" style="display:none"/>
+    <path class="trend-line${cls}" pathLength="1" d="${line}"/>
+    ${ticks}
+    <circle class="last-ring" cx="${f(lastX)}" cy="${f(lastY)}" r="9"/>
+    <circle class="dot" cx="${f(lastX)}" cy="${f(lastY)}" r="4.5"/>
+    <line class="cur" id="cur" x1="0" x2="0" y1="${top}" y2="${base}" style="display:none"/>
     <circle class="curdot" id="curdot" r="5.5" style="display:none"/>
   </svg>`;
 
