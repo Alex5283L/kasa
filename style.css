@@ -157,3 +157,21 @@ body, .card, .tile, .group, .chip, .btn { transition: background-color .25s, col
   animation: pulse 2.2s ease-out infinite;
 }
 @keyframes pulse { from { transform: scale(.5); opacity: .4; } to { transform: scale(1.7); opacity: 0; } }
+
+/* перемикач графіка і стовпчики */
+.seg { display: flex; gap: 6px; margin: -4px 0 14px; }
+.seg .chip { font-size: 13px; padding: 6px 13px; background: var(--bg); }
+.seg .chip.on { background: var(--text); color: var(--bg); }
+.zero { stroke: var(--line); stroke-width: 1; }
+.hit { fill: transparent; }
+.bar-up { fill: var(--income); }
+.bar-dn { fill: var(--bar); }
+.bar-up, .bar-dn { transition: opacity .15s; }
+.sel .bar-up, .sel .bar-dn { opacity: .3; }
+.sel g.on .bar-up, .sel g.on .bar-dn { opacity: 1; }
+.grow { transform-box: fill-box; animation: grow .6s cubic-bezier(.2, .8, .2, 1); }
+.bar-up.grow { transform-origin: bottom; }
+.bar-dn.grow { transform-origin: top; }
+@keyframes grow { from { transform: scaleY(0); } }
+.trend-info b.inc { color: var(--income); }
+.trend-info b.neg { color: var(--bar); }

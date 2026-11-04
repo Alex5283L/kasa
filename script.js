@@ -3,7 +3,7 @@ const CARD_NUMBER = "4874100033306757";
 const PAGE_SIZE = 30;
 
 const $ = id => document.getElementById(id);
-const state = { rows: [], period: "all", shown: PAGE_SIZE };
+const state = { rows: [], period: "30", view: "line", shown: PAGE_SIZE };
 
 /* ---------- допоміжні функції ---------- */
 
@@ -149,7 +149,7 @@ function render(animate) {
   warn.textContent = `Не враховано операцій: ${state.skipped}. У таблиці в них незрозумілий тип — має бути «Надходження» або «Витрата».`;
 
   state.trend = { rows, opening };
-  renderTrend(rows, opening, animate);
+  drawChart(animate);
   renderCats($("incCats"), inc, incSum, "Надходжень ще немає", animate);
   renderCats($("expCats"), exp, expSum, "Витрат ще немає", animate);
   renderJournal(rows);
@@ -244,6 +244,80 @@ function renderTrend(rows, opening, animate) {
   idle();
 }
 
+function drawChart(animate) {
+  const t = state.trend;
+  if (!t) return;
+  if (state.view === "bars") renderBars(t.rows, animate);
+  else renderTrend(t.rows, t.opening, animate);
+}
+
+// стовпчики: скільки надійшло (вгору) і скільки витрачено (вниз) за годину / день / місяць
+function renderBars(rows, animate) {
+  const el = $("trend"), info = $("trendInfo"), p = state.period;
+  const dated = rows.filter(r => r.date);
+  if (!dated.length) { el.innerHTML = '<p class="empty">Ще немає операцій за цей період</p>'; info.innerHTML = ""; return; }
+
+  const now = new Date(), start = p === "all" ? Math.min(...dated.map(r => +r.date)) : +now - p * 864e5;
+  const unit = p === "1" ? "h" : (p === "365" || (+now - start) / 864e5 > 120) ? "m" : "d";
+  const key = d => unit === "h" ? new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours()).getTime()
+    : unit === "m" ? new Date(d.getFullYear(), d.getMonth(), 1).getTime()
+    : new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
+  const buckets = new Map();
+  for (let d = new Date(key(new Date(start))), end = key(now); +d <= end;
+       unit === "h" ? d.setHours(d.getHours() + 1) : unit === "m" ? d.setMonth(d.getMonth() + 1) : d.setDate(d.getDate() + 1)) {
+    buckets.set(+d, { inc: 0, exp: 0 });
+  }
+  dated.forEach(r => { const b = buckets.get(key(r.date)); if (b) b[r.kind] += r.sum; });
+  const list = [...buckets.entries()].map(([t, b]) => ({ t, inc: b.inc, exp: b.exp }));
+
+  const up = Math.max(...list.map(b => b.inc)), dn = Math.max(...list.map(b => b.exp));
+  const W = el.clientWidth || 320, H = 170, top = 12, bottom = 26, plotH = H - top - bottom;
+  const scale = plotH / ((up + dn) || 1), zero = top + up * scale;
+  const slot = W / list.length, bw = Math.max(2, Math.min(28, slot * 0.62));
+  const f = n => n.toFixed(1), g = animate && !REDUCED ? " grow" : "";
+  const when = t => { const d = new Date(t); return unit === "h" ? `${dayLabel(d)}, ${pad(d.getHours())}:00` : unit === "m" ? d.toLocaleDateString("uk-UA", { month: "long", year: "numeric" }) : dayLabel(d); };
+  const tick = t => { const d = new Date(t); return unit === "h" ? pad(d.getHours()) + ":00" : unit === "m" ? d.toLocaleDateString("uk-UA", { month: "short", year: "2-digit" }) : pad(d.getDate()) + "." + pad(d.getMonth() + 1); };
+
+  const bars = list.map((b, i) => {
+    const x = slot * i + (slot - bw) / 2, r = Math.min(3, bw / 2);
+    const hu = b.inc ? Math.max(3, b.inc * scale) : 0, hd = b.exp ? Math.max(3, b.exp * scale) : 0;
+    return `<g><rect class="hit" x="${f(slot * i)}" y="0" width="${f(slot)}" height="${H}"/>`
+      + (hu ? `<rect class="bar-up${g}" x="${f(x)}" y="${f(zero - hu)}" width="${f(bw)}" height="${f(hu)}" rx="${r}"/>` : "")
+      + (hd ? `<rect class="bar-dn${g}" x="${f(x)}" y="${f(zero)}" width="${f(bw)}" height="${f(hd)}" rx="${r}"/>` : "") + "</g>";
+  }).join("");
+
+  const last = list.length - 1;
+  const idx = list.length >= 5 ? [0, Math.floor(last / 2), last] : [0, last];
+  const ticks = [...new Set(idx)].map(i => {
+    const a = i === 0 ? "start" : i === last ? "end" : "middle";
+    return `<text class="lbl" x="${f(a === "start" ? 0 : a === "end" ? W : slot * i + slot / 2)}" y="${H - 7}" text-anchor="${a}">${tick(list[i].t)}</text>`;
+  }).join("");
+
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Рух коштів">
+    <line class="zero" x1="0" x2="${W}" y1="${f(zero)}" y2="${f(zero)}"/>${bars}${ticks}</svg>`;
+
+  const svg = el.querySelector("svg"), groups = svg.querySelectorAll("g");
+  const sums = b => (b.inc ? `<b class="inc">+${money(b.inc)}</b> ` : "") + (b.exp ? `<b class="neg">−${money(b.exp)}</b> ` : "");
+  const total = { inc: list.reduce((s, b) => s + b.inc, 0), exp: list.reduce((s, b) => s + b.exp, 0) };
+  const idle = () => {
+    svg.classList.remove("sel");
+    groups.forEach(x => x.classList.remove("on"));
+    info.innerHTML = "За період " + sums(total);
+  };
+  const move = e => {
+    const box = svg.getBoundingClientRect();
+    const i = Math.max(0, Math.min(last, Math.floor((e.clientX - box.left) / box.width * list.length)));
+    svg.classList.add("sel");
+    groups.forEach((x, k) => x.classList.toggle("on", k === i));
+    info.innerHTML = (sums(list[i]) || "<b>0 ₴</b> ") + "· " + esc(when(list[i].t));
+  };
+  svg.addEventListener("pointerdown", move);
+  svg.addEventListener("pointermove", move);
+  svg.addEventListener("pointerleave", idle);
+  idle();
+}
+
 function dayLabel(d) {
   if (!d) return "Без дати";
   const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
@@ -283,6 +357,15 @@ $("periods").addEventListener("click", e => {
   state.shown = PAGE_SIZE;
   document.querySelectorAll("#periods .chip").forEach(b => b.classList.toggle("on", b === btn));
   render(true);
+});
+
+$("views").addEventListener("click", e => {
+  const btn = e.target.closest("[data-v]");
+  if (!btn) return;
+  state.view = btn.dataset.v;
+  document.querySelectorAll("#views .chip").forEach(b => b.classList.toggle("on", b === btn));
+  $("chartTitle").textContent = state.view === "bars" ? "Рух коштів" : "Динаміка залишку";
+  drawChart(true);
 });
 
 $("copy").addEventListener("click", async () => {
@@ -344,7 +427,7 @@ function showToast(fresh) {
 let resizeTimer;
 addEventListener("resize", () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => state.trend && renderTrend(state.trend.rows, state.trend.opening, false), 150);
+  resizeTimer = setTimeout(() => drawChart(false), 150);
 });
 
 load(false);

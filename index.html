@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 <main class="app">
@@ -39,16 +39,21 @@
     </section>
 
     <div class="chips" id="periods" role="group" aria-label="Період">
+      <button class="chip" type="button" data-p="1">1 день</button>
       <button class="chip" type="button" data-p="7">7 днів</button>
-      <button class="chip" type="button" data-p="30">30 днів</button>
+      <button class="chip on" type="button" data-p="30">30 днів</button>
       <button class="chip" type="button" data-p="365">Рік</button>
-      <button class="chip on" type="button" data-p="all">Увесь час</button>
+      <button class="chip" type="button" data-p="all">Увесь час</button>
     </div>
 
     <p class="warn" id="warn" hidden></p>
 
     <section class="card">
-      <h2>Динаміка залишку</h2>
+      <h2 id="chartTitle">Динаміка залишку</h2>
+      <div class="seg" id="views" role="group" aria-label="Вигляд графіка">
+        <button class="chip on" type="button" data-v="line">Залишок</button>
+        <button class="chip" type="button" data-v="bars">Рух коштів</button>
+      </div>
       <div id="trend"></div>
       <p class="muted trend-info" id="trendInfo"></p>
     </section>
@@ -78,6 +83,6 @@
 
 </main>
 <div class="toast" id="toast" role="status" hidden></div>
-<script src="script.js?v=3"></script>
+<script src="script.js?v=4"></script>
 </body>
 </html>
